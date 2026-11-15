@@ -1,4 +1,4 @@
 # One caption per line:   filename: caption
 # Leave out _med / _big. Lines starting with # are ignored.
 #
-# IMG_0042.jpg: Last light over the cornfields, heading home on I-57.
+# IMG_0042.jpg: Last light over the cornfields, heading home on I-57.are
