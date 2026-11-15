@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photography · Akshay Naik</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♞</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+  :root {
+    --paper: #FBF7EC;
+    --ink: #2B2B2B;
+    --muted: #8A8478;
+    --link: #8B3A2B;
+    --serif: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Crimson Text", serif;
+    --edge: 1.5rem;
+  }
+
+  html { scrollbar-width: none; }
+  html::-webkit-scrollbar { display: none; }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.45;
+    font-variant-numeric: oldstyle-nums proportional-nums;
+    text-rendering: optimizeLegibility;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    max-width: 556px;
+    padding: 5rem var(--edge) 2.5rem;
+  }
+
+  h1 {
+    margin: 0 0 1.5rem;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  a {
+    color: var(--link);
+    text-decoration-thickness: 0.05em;
+    text-underline-offset: 0.12em;
+  }
+
+  .empty { color: var(--muted); }
+
+  /* the collage: built by the script at the bottom from photos.js */
+  #collage { padding: 0 var(--edge) 6rem; }
+  .row, .block { display: flex; gap: 6px; margin-bottom: 6px; align-items: flex-start; }
+  .stack { display: flex; flex-direction: column; gap: 6px; }
+  .stack .row { margin: 0; }
+  figure { margin: 0; flex: none; }
+  figure img { display: block; object-fit: cover; background: #ECE5D5; }
+  figcaption {
+    box-sizing: border-box;
+    height: 46px;
+    padding-top: 6px;
+    overflow: hidden;
+    font-style: italic;
+    font-size: .9em;
+    line-height: 1.3;
+    color: var(--muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  @media (max-width: 722px) {
+    .content { padding: 3rem var(--edge) 1.75rem; }
+    h1 { font-size: 30px; }
+    body { font-size: 15px; }
+    figcaption { height: auto; -webkit-line-clamp: unset; padding-bottom: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="content">
+  <h1>Photography</h1>
+  <a href="/">← back</a>
+</div>
+
+<div id="collage"></div>
+
+<!-- photos.js is written automatically by build.mjs from assets/photography/ -->
+<script src="photos.js"></script>
+<script>
+(() => {
+  const photos = window.PHOTOS || [];
+  const root = document.getElementById("collage");
+  if (!photos.length) {
+    root.innerHTML = '<p class="empty">No photos yet.</p>';
+    return;
+  }
+
+  const GAP = 6, CAP = 46;
+  const ar = p => p.w / p.h;
+  const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+  const rowH = (items, W) => (W - GAP * (items.length - 1)) / sum(items, ar);
+
+  function fig(p, w, h) {
+    const f = document.createElement("figure");
+    f.style.width = w + "px";
+    const img = document.createElement("img");
+    img.src = p.src;
+    img.srcset = p.srcset;
+    img.sizes = Math.ceil(w) + "px";
+    img.width = Math.round(w);
+    img.height = Math.round(h);
+    img.style.width = w + "px";
+    img.style.height = h + "px";
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.alt = p.caption || "";
+    f.appendChild(img);
+    if (p.caption) {
+      const c = document.createElement("figcaption");
+      c.textContent = p.caption;
+      f.appendChild(c);
+    }
+    return f;
+  }
+
+  function rowEl(items, h) {
+    const r = document.createElement("div");
+    r.className = "row";
+    items.forEach(p => r.appendChild(fig(p, ar(p) * h, h)));
+    return r;
+  }
+
+  // every way to cut n photos into k rows of at least 2
+  function splits(n, k) {
+    if (k === 1) return n >= 2 ? [[n]] : [];
+    const out = [];
+    for (let a = 2; a <= n - 2 * (k - 1); a++) splits(n - a, k - 1).forEach(r => out.push([a, ...r]));
+    return out;
+  }
+
+  // A _med/_big photo with k rows of smaller photos stacked beside it, all edges flush.
+  function bestBlock(feat, rest, W, target, k) {
+    let best = null;
+    const af = ar(feat);
+    for (let n = 2 * k; n <= Math.min(4 * k, rest.length); n++) {
+      for (const sp of splits(n, k)) {
+        let i = 0;
+        const groups = sp.map(m => rest.slice(i, i += m));
+        const A = groups.map(g => sum(g, ar));
+        const c = groups.map(g => GAP * (g.length - 1));
+        const caps = sum(groups, g => (g.some(p => p.caption) ? CAP : 0));
+        const K = sum(A, a => 1 / a);
+        const C = A.reduce((s, a, j) => s + c[j] / a, 0);
+        const H = ((W - GAP) * K - C + (k - 1) * GAP + caps) / (1 + af * K);
+        const R = W - GAP - af * H;
+        const hs = A.map((a, j) => (R - c[j]) / a);
+        if (R < W * 0.3 || H > target * (k + 0.4) || hs.some(h => h < target * 0.55)) continue;
+        const score = Math.abs(H - target * k * 1.02) + (Math.max(...hs) - Math.min(...hs)) * 0.5;
+        if (!best || score < best.score) best = { H, R, groups, hs, score };
+      }
+    }
+    return best;
+  }
+
+  function layout() {
+    const W = root.clientWidth - parseFloat(getComputedStyle(root).paddingLeft) * 2;
+    const narrow = innerWidth <= 722;
+    const base = narrow ? 165 : Math.max(220, W * 0.17);
+    root.innerHTML = "";
+
+    let seed = 3;                                  // fixed seed: same layout on every visit
+    const rand = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const nextTarget = () => base * (0.82 + rand() * 0.42);   // rows vary about ±20%
+
+    let queue = photos.slice(), row = [], waiting = [], side = 0, target = nextTarget(), prev = null;
+
+    const flushRow = (last) => {
+      let h = rowH(row, W);
+      if (last && h > target * 1.3 && prev && prev.el === root.lastChild) {
+        root.removeChild(prev.el);                 // fold a short last row into the one above
+        row = prev.items.concat(row);
+        h = rowH(row, W);
+      } else if (last && h > target * 1.3) {
+        h = target;
+      }
+      const el = rowEl(row, h);
+      root.appendChild(el);
+      prev = { el, items: row };
+      row = [];
+      target = nextTarget();
+    };
+
+    while (queue.length) {
+      // _med/_big photos wait for the start of the next row
+      if (waiting.length && row.length === 0) {
+        const pending = waiting.shift();
+        if (narrow) {                              // phones: _med/_big get a full-width row
+          row.push(pending);
+          flushRow(false);
+          continue;
+        }
+        const rest = queue.filter(p => !p.size);
+        const b = (pending.size === "big" && bestBlock(pending, rest, W, base, 3))
+               || bestBlock(pending, rest, W, base, 2);
+        if (b) {
+          const used = new Set(b.groups.flat());
+          queue = queue.filter(p => !used.has(p));
+          const blk = document.createElement("div");
+          blk.className = "block";
+          const big = fig(pending, ar(pending) * b.H, b.H);
+          const st = document.createElement("div");
+          st.className = "stack";
+          st.style.width = b.R + "px";
+          b.groups.forEach((g, j) => st.appendChild(rowEl(g, b.hs[j])));
+          side++ % 2 ? blk.append(st, big) : blk.append(big, st);
+          root.appendChild(blk);
+          prev = null;
+        } else {
+          row.push(pending);                       // not enough photos around it: normal size
+        }
+        continue;
+      }
+      const p = queue.shift();
+      if (p.size) { waiting.push(p); continue; }
+      // break the row wherever its height lands closest to the target
+      if (row.length && rowH(row.concat(p), W) < target &&
+          Math.abs(rowH(row, W) - target) < Math.abs(rowH(row.concat(p), W) - target)) {
+        flushRow(false);
+        row.push(p);
+        continue;
+      }
+      row.push(p);
+      if (rowH(row, W) <= target) flushRow(false);
+    }
+    row.push(...waiting);
+    if (row.length) flushRow(true);
+  }
+
+  layout();
+  let lastW = innerWidth, t;
+  addEventListener("resize", () => {
+    if (innerWidth === lastW) return;            // ignore phone address-bar height changes
+    lastW = innerWidth;
+    clearTimeout(t);
+    t = setTimeout(layout, 120);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "aknaik-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.35.5"
+  }
+}
