@@ -17,7 +17,8 @@ const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".
 
 // Not copied to the live site
 const SKIP = new Set(["dist", "node_modules", ".git", ".github", "package.json",
-  "package-lock.json", "build.mjs", ".node-version", ".gitignore"]);
+  "package-lock.json", "build.mjs", ".node-version", ".gitignore",
+  "README.md", "wrangler.jsonc"]);
 
 const warn = (msg) => console.warn("⚠  " + msg);
 
