@@ -27,6 +27,7 @@ async function copySite(from, to) {
   for (const entry of await fs.readdir(from, { withFileTypes: true })) {
     const src = path.join(from, entry.name);
     if (from === ROOT && SKIP.has(entry.name)) continue;
+    if (entry.name.startsWith("_")) continue;              // _notes, _template etc. stay private
     if (src === PHOTOS_SRC) continue;                       // handled below
     if (entry.isDirectory()) await copySite(src, path.join(to, entry.name));
     else await fs.copyFile(src, path.join(to, entry.name));

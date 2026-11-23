@@ -84,7 +84,20 @@
     pointer-events: none;
   }
 
+
+  /* project entries (copy one from portfolio/_template.html) */
+  .project { margin-top: 3rem; }
+  .project h2 { margin: 0; font-size: 22px; font-weight: 400; letter-spacing: -0.01em; }
+  .project .meta { margin: 0.15rem 0 0.6rem; color: var(--muted); font-size: 0.95em; }
+  .project p { margin: 0 0 0.9rem; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; margin-bottom: 0.7rem; }
+  .shots img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #ECE5D5; }
+  .shots img:only-child { width: calc(50% - 0.3rem); }
+  .skills { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+  .project .links { margin-top: 0.3rem; font-size: 0.95em; }
+
   @media (max-width: 722px) {
+    .shots img:only-child { width: 100%; }
     .content { padding: 3rem 1.5rem 4rem; }
     h1 { font-size: 30px; }
     body { font-size: 15px; }
@@ -96,6 +109,9 @@
 <div class="content">
   <h1>Portfolio</h1>
   <a href="/">← back</a>
+
+  <!-- Paste project entries below this line, best project first. Template: portfolio/_template.html -->
+
 </div>
 
 <div id="ascii-art" aria-hidden="true"></div>
