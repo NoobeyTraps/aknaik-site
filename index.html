@@ -14,12 +14,15 @@
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♞</text></svg>">
 <script>
-  // type the text in once per visit (not when coming back to this page, and not for reduced motion)
+  // type the text in once per visit (not when coming back to this page, and not for reduced motion).
+  // This only hides the text early to avoid a flash; whether to type is decided once the page is
+  // actually shown (see the typewriter at the end), since a page Chrome preloads in the background
+  // loses anything it saves to sessionStorage.
   try {
     if (!sessionStorage.getItem("typed") && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document.documentElement.classList.add("typing");
-      sessionStorage.setItem("typed", "1");
-      setTimeout(() => document.documentElement.classList.remove("typing"), 3000);   // never stay hidden
+      if (!document.prerendering)
+        setTimeout(() => document.documentElement.classList.remove("typing"), 3000);   // never stay hidden
     }
   } catch (e) {}
 </script>
@@ -150,6 +153,14 @@
 (() => {
   const root = document.documentElement;
   if (!root.classList.contains("typing")) return;
+  if (document.prerendering) document.addEventListener("prerenderingchange", begin, { once: true });
+  else begin();
+
+  function begin() {
+  try {
+    if (sessionStorage.getItem("typed")) { root.classList.remove("typing"); return; }
+    sessionStorage.setItem("typed", "1");
+  } catch (e) {}
   const box = document.querySelector(".content");
   const nodes = [];
   const walk = document.createTreeWalker(box, NodeFilter.SHOW_TEXT);
@@ -180,6 +191,7 @@
     setTimeout(step, wait);
   }
   step();
+  }
 })();
 </script>
 <script src="/assets/ascii-scenes.js"></script>
