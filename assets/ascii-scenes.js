@@ -1247,7 +1247,7 @@ return auroraFjord;
   const SCENE_LIST = ["lake", "fjord"];   // picked at random on each load
   const RAMP = " .:-=+*#%";              // the same characters as the old hills, light to heavy
   const COLS = 300;                       // characters across
-  const SQUASH = 0.5;                     // flatten the picture to half height so it stays a strip
+  const SQUASH = 0.4;                     // flatten the picture to 40% height so it stays a low strip
   const SPEED = 0.45;                     // scene time per real second (under half speed)
   const FPS = 10;
   const CLS = ["", "g", "l", "v", "d"];   // colour classes: none, glow, light, violet, deep violet
@@ -1329,7 +1329,7 @@ return auroraFjord;
         cls[k] = light > refl ? (light > 0.55 ? 2 : 1) : mk >= 0 && cls[mk] >= 3 ? 3 : mk >= 0 && cls[mk] ? 1 : 0;
       }
     }
-    draw(W, H, 6);
+    draw(W, H, 12);
   }
 
   // ---- Aurora Fjord -----------------------------------------------------------
@@ -1422,7 +1422,7 @@ return auroraFjord;
         for (let s2 = -2; s2 <= 2; s2++) put(W, H, lx + s2 + Math.sin(dr + t * 2), y0 + dr, 0.6 * (1 - dr / 16) * fl * (Math.abs(s2) === 2 ? 0.4 : 1), dr < 7 ? 2 : 1);
       }
     }
-    draw(W, H, 0);
+    draw(W, H, 6);
   }
 
   // ---- run -------------------------------------------------------------------
