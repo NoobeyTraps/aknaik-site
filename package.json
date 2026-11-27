@@ -6,6 +6,7 @@
     "build": "node build.mjs"
   },
   "dependencies": {
+    "marked": "16.4.1",
     "sharp": "^0.35.5"
   }
 }
