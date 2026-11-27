@@ -1,0 +1,35 @@
+/* Animated ASCII scene along the bottom of the window, behind the text.
+   Drawn by /assets/ascii-scenes.js. Used on every page except photography. */
+  #scene {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: max(0.57vw, 3px);   /* 300 columns fill the width */
+    line-height: 1;
+    white-space: pre;
+    pointer-events: none;
+    /* ink darkens toward the bottom of the window */
+    color: transparent;
+    background: linear-gradient(to top, #7E7360 0, #978C77 5vw, #B4AA94 11vw, #CFC6B2 17vw, #E2DBCB 24vw) bottom / 100% 100% no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    /* the top melts into the page and the sides soften, so the scene has no hard edge */
+    -webkit-mask-image: linear-gradient(to top, #000 55%, transparent 100%), linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to top, #000 55%, transparent 100%), linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+    mask-composite: intersect;
+  }
+  /* colour: lantern and lamp light in burnt orange, distant ranges and aurora in dusty violet */
+  #scene .g { color: #E4A06C; }   /* glow: halos, light on the water */
+  #scene .l { color: #CF6228; }   /* the lights themselves */
+  #scene .v { color: #9E8BB5; }   /* distant ranges, aurora */
+  #scene .d { color: #7A6596; }   /* their darker faces */
+
+@media (max-width: 722px) {
+  #scene { display: none; }
+}

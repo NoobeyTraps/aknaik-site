@@ -1,23 +1,27 @@
 // Builds the site into dist/ for Cloudflare Pages.
 // Copies everything as-is, then turns the photos in assets/photography/ into
-// web-sized copies plus photography/photos.js (the list the photography page reads).
+// web-sized copies plus photography/photos.js (the list the photography page reads),
+// and builds the Thoughts pages from the posts in thoughts/ (see build-thoughts.mjs).
 // Run locally with:  npm install && npm run build
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { buildThoughts } from "./build-thoughts.mjs";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.join(ROOT, "dist");
 const PHOTOS_SRC = path.join(ROOT, "assets", "photography");
 const PHOTOS_OUT = path.join(DIST, "assets", "photography");
+const THOUGHTS_SRC = path.join(ROOT, "thoughts");
+const POST_EXT = new Set([".md", ".markdown", ".txt"]);
 const WIDTHS = [640, 1280, 2000];
 const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".avif"]);
 
 // Not copied to the live site
 const SKIP = new Set(["dist", "node_modules", ".git", ".github", "package.json",
-  "package-lock.json", "build.mjs", ".node-version", ".gitignore",
+  "package-lock.json", "build.mjs", "build-thoughts.mjs", ".node-version", ".gitignore",
   "README.md", "wrangler.jsonc"]);
 
 const warn = (msg) => console.warn("⚠  " + msg);
@@ -29,6 +33,7 @@ async function copySite(from, to) {
     if (from === ROOT && SKIP.has(entry.name)) continue;
     if (entry.name.startsWith("_")) continue;              // _notes, _template etc. stay private
     if (src === PHOTOS_SRC) continue;                       // handled below
+    if (from === THOUGHTS_SRC && POST_EXT.has(path.extname(entry.name).toLowerCase())) continue;   // posts become pages
     if (entry.isDirectory()) await copySite(src, path.join(to, entry.name));
     else await fs.copyFile(src, path.join(to, entry.name));
   }
@@ -123,4 +128,5 @@ async function buildPhotos() {
 await fs.rm(DIST, { recursive: true, force: true });
 await copySite(ROOT, DIST);
 await buildPhotos();
+await buildThoughts({ src: THOUGHTS_SRC, out: path.join(DIST, "thoughts"), warn });
 console.log("Built site into dist/");

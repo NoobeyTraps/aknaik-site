@@ -1,0 +1,7 @@
+/* Typewriter (see /assets/typewriter.js): the text under the h1 is hidden until typing starts. */
+.typing .content { visibility: hidden; }
+.typing .content h1 { visibility: visible; }
+.caret { color: var(--muted); margin-left: 1px; }
+.caret.blink { animation: blink 1.06s steps(1) infinite; }
+.caret.gone { opacity: 0; transition: opacity .6s; }
+@keyframes blink { 50% { opacity: 0; } }

@@ -9,10 +9,14 @@ index.html               home page  → aknaik.com/
 portfolio/index.html     → aknaik.com/portfolio/
 photography/index.html   → aknaik.com/photography/
 contact/index.html       → aknaik.com/contact/
+thoughts/                posts → aknaik.com/thoughts/ (pages are generated, see below)
 resume.pdf               → aknaik.com/resume.pdf
-assets/ascii-arts.js     background ASCII art used on every page
+assets/ascii-scenes.js   the animated scene along the bottom (lake or fjord, one per visit)
+assets/scene.css         its styles and colours; every page but photography links it
+assets/typewriter.js/.css   the typing effect (home page and the Thoughts list)
 assets/photography/      original photos + captions.txt (see below)
 build.mjs                builds the site into dist/
+build-thoughts.mjs       turns thoughts/ into the Thoughts pages
 wrangler.jsonc           Cloudflare Worker config (serves dist/)
 ```
 
@@ -21,6 +25,19 @@ Each page has its own `<style>` block in its `<head>`. There's no shared stylesh
 ## Adding a page
 
 Copy a folder like `contact/` to a new name, for example `about/`, then edit `about/index.html`. Change the `<title>`, the description and `og:` tags under it, and the content. It goes live at `aknaik.com/about/`. Link to it from the home page with `<a href="/about/">About</a>`.
+
+## Thoughts (blog)
+
+Add a file to `thoughts/` and it shows up on aknaik.com/thoughts/ the next time the site builds. No page to edit.
+
+- **Name it with the date first:** `2026-11-26 Why I like chess.md`. The date sets the order, newest on top. The rest of the name becomes the headline.
+- **Headline with `?` or `:` in it?** File names can't hold those, so put `# What is a qubit, really?` on the first line instead. That line wins over the file name.
+- **Write in plain text** (`.txt` or `.md`). Blank lines separate paragraphs. Markdown works too: `## subheading`, `*italic*`, `**bold**`, `[link](https://…)`, `- lists`, `> quotes`.
+- **Images:** put the image in `thoughts/` and write `![short description](photo.jpg)`.
+- **Drafts:** start the file name with `_` and it won't be published.
+- `thoughts/_example.md` is a draft with all of this in it.
+
+A file with no date at the front still gets published, but goes at the bottom with no date, and the build prints a warning.
 
 ## Photos
 

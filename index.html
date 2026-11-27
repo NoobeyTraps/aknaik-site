@@ -14,18 +14,16 @@
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♞</text></svg>">
 <script>
-  // type the text in once per visit (not when coming back to this page, and not for reduced motion).
-  // This only hides the text early to avoid a flash; whether to type is decided once the page is
-  // actually shown (see the typewriter at the end), since a page Chrome preloads in the background
-  // loses anything it saves to sessionStorage.
+  // typewriter: hide the text under the h1 until /assets/typewriter.js types it in (once per visit)
   try {
-    if (!sessionStorage.getItem("typed") && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!sessionStorage.getItem("typed:" + location.pathname) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document.documentElement.classList.add("typing");
-      if (!document.prerendering)
-        setTimeout(() => document.documentElement.classList.remove("typing"), 3000);   // never stay hidden
+      if (!document.prerendering) setTimeout(() => document.documentElement.classList.remove("typing"), 4000);   // never stay hidden
     }
   } catch (e) {}
 </script>
+<link rel="stylesheet" href="/assets/typewriter.css">
+<link rel="stylesheet" href="/assets/scene.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap">
 <style>
   :root {
@@ -83,48 +81,8 @@
     color: var(--muted);
   }
 
-  /* animated ASCII scene along the bottom of the window, behind the text
-     (drawn by /assets/ascii-scenes.js: Lantern Lake or Aurora Fjord, picked at random) */
-  #scene {
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    z-index: 0;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    overflow: hidden;
-    font-family: var(--mono);
-    font-size: max(0.57vw, 3px);   /* 300 columns fill the width */
-    line-height: 1;
-    white-space: pre;
-    pointer-events: none;
-    /* ink darkens toward the bottom of the window */
-    color: transparent;
-    background: linear-gradient(to top, #7E7360 0, #978C77 5vw, #B4AA94 11vw, #CFC6B2 17vw, #E2DBCB 24vw) bottom / 100% 100% no-repeat;
-    -webkit-background-clip: text;
-    background-clip: text;
-    /* the top melts into the page and the sides soften, so the scene has no hard edge */
-    -webkit-mask-image: linear-gradient(to top, #000 55%, transparent 100%), linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to top, #000 55%, transparent 100%), linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
-    mask-composite: intersect;
-  }
-  /* colour: lantern and lamp light in burnt orange, distant ranges and aurora in dusty violet */
-  #scene .g { color: #E4A06C; }   /* glow: halos, light on the water */
-  #scene .l { color: #CF6228; }   /* the lights themselves */
-  #scene .v { color: #9E8BB5; }   /* distant ranges, aurora */
-  #scene .d { color: #7A6596; }   /* their darker faces */
-
-  /* typing: the lines under the name are hidden until the typewriter starts */
-  .typing .content { visibility: hidden; }
-  .typing .content h1 { visibility: visible; }
-  .caret { color: var(--muted); margin-left: 1px; }
-  .caret.blink { animation: blink 1.06s steps(1) infinite; }
-  .caret.gone { opacity: 0; transition: opacity .6s; }
-  @keyframes blink { 50% { opacity: 0; } }
 
   @media (max-width: 722px) {
-    #scene { display: none; }
     .content { padding: 3rem 1.5rem 4rem; }
     h1 { font-size: 30px; }
     body { font-size: 15px; }
@@ -141,59 +99,14 @@
   <br>
   <a href="/portfolio/">Portfolio</a><br>
   <a href="/photography/">Photography</a><br>
+  <a href="/thoughts/">Thoughts</a><br>
   <a href="/resume.pdf">Resume</a><br>
   <a href="/contact/">Contact</a>
 </div>
 
 <pre id="scene" aria-hidden="true"></pre>
 
-<script>
-// Typewriter: types the lines under the name, then the links (quickly), once per visit.
-// The text and links are in the page from the start; this only reveals them letter by letter.
-(() => {
-  const root = document.documentElement;
-  if (!root.classList.contains("typing")) return;
-  if (document.prerendering) document.addEventListener("prerenderingchange", begin, { once: true });
-  else begin();
-
-  function begin() {
-  try {
-    if (sessionStorage.getItem("typed")) { root.classList.remove("typing"); return; }
-    sessionStorage.setItem("typed", "1");
-  } catch (e) {}
-  const box = document.querySelector(".content");
-  const nodes = [];
-  const walk = document.createTreeWalker(box, NodeFilter.SHOW_TEXT);
-  while (walk.nextNode()) {
-    const n = walk.currentNode;
-    if (n.parentElement.closest("h1") || !n.nodeValue.trim()) continue;
-    nodes.push({ n, full: n.nodeValue });
-  }
-  nodes.forEach(o => { o.n.nodeValue = ""; });
-  root.classList.remove("typing");
-  const caret = Object.assign(document.createElement("span"), { className: "caret", textContent: "\u258C" });
-  let i = 0, c = 0;
-  function step() {
-    const o = nodes[i];
-    if (!o) {
-      caret.classList.add("blink");
-      setTimeout(() => { caret.classList.add("gone"); setTimeout(() => caret.remove(), 700); }, 1800);
-      return;
-    }
-    const link = o.n.parentElement.closest("a");
-    const text = o.full.replace(/^\s+/, ""), lead = o.full.slice(0, o.full.length - text.length);
-    c++;
-    o.n.nodeValue = lead + text.slice(0, c);
-    (link || o.n).after(caret);
-    let wait = link ? 8 : 11 + Math.random() * 14;   // links go fast so nobody waits to click
-    if (text[c - 1] === " " && !link) wait += 10;
-    if (c >= text.trimEnd().length) { o.n.nodeValue = o.full; i++; c = 0; wait = link ? 40 : 90; }
-    setTimeout(step, wait);
-  }
-  step();
-  }
-})();
-</script>
+<script src="/assets/typewriter.js"></script>
 <script src="/assets/ascii-scenes.js"></script>
 </body>
 </html>

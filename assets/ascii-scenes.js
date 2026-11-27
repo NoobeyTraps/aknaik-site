@@ -1,5 +1,5 @@
-// Animated ASCII scene along the bottom of the home page.
-// On each load it picks one of two scenes at random: Lantern Lake or Aurora Fjord.
+// Animated ASCII scene along the bottom of the page (every page except photography).
+// Each visit picks one of two scenes at random (Lantern Lake or Aurora Fjord) and keeps it across pages.
 //
 // Both scenes are adapted from ascii.rest by bas3line (https://ascii.rest,
 // https://github.com/bas3line/ascii). The scene code is theirs; the changes here
@@ -1244,7 +1244,7 @@ return auroraFjord;
   if (!host) return;
   if (matchMedia("(max-width: 722px)").matches) return;   // hidden on phones; don't run there
 
-  const SCENE_LIST = ["lake", "fjord"];   // picked at random on each load
+  const SCENE_LIST = ["lake", "fjord"];   // one is picked at random per visit
   const RAMP = " .:-=+*#%";              // the same characters as the old hills, light to heavy
   const COLS = 300;                       // characters across
   const SQUASH = 0.4;                     // flatten the picture to 40% height so it stays a low strip
@@ -1426,7 +1426,16 @@ return auroraFjord;
   }
 
   // ---- run -------------------------------------------------------------------
-  const pick = SCENE_LIST[Math.floor(Math.random() * SCENE_LIST.length)];
+  // picked at random once per visit, then kept, so it doesn't change between pages
+  let pick = null;
+  try { pick = sessionStorage.getItem("scene"); } catch (e) {}
+  if (!SCENE_LIST.includes(pick)) {
+    pick = SCENE_LIST[Math.floor(Math.random() * SCENE_LIST.length)];
+    const remember = () => { try { sessionStorage.setItem("scene", pick); } catch (e) {} };
+    // a page Chrome preloads in the background loses what it saves, so save once it's shown
+    if (document.prerendering) document.addEventListener("prerenderingchange", remember, { once: true });
+    else remember();
+  }
   const frame = pick === "lake" ? lakeFrame : fjordFrame;
   const T0 = 8;                                   // start a few seconds in, so the scene is already alive
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) { frame(T0); return; }
