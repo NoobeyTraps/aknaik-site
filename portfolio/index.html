@@ -14,6 +14,7 @@
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♞</text></svg>">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="/assets/scene.css">
 <style>
   :root {
     --paper: #FBF7EC;
@@ -67,24 +68,6 @@
     color: var(--muted);
   }
 
-  #ascii-art {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    overflow: hidden;
-    margin: 0;
-    color: var(--art);
-    font-family: var(--mono);
-    font-size: max(0.57vw, 3px);
-    line-height: 1;
-    white-space: pre;
-    pointer-events: none;
-  }
-
-
   /* project entries (copy one from portfolio/_template.html) */
   .project { margin-top: 3rem; }
   .project h2 { margin: 0; font-size: 22px; font-weight: 400; letter-spacing: -0.01em; }
@@ -114,8 +97,8 @@
   Work In Progress.
 </div>
 
-<div id="ascii-art" aria-hidden="true"></div>
+<pre id="scene" aria-hidden="true"></pre>
 
-<script src="/assets/ascii-arts.js"></script>
+<script src="/assets/ascii-scenes.js"></script>
 </body>
 </html>

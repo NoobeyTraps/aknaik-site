@@ -11,7 +11,9 @@ photography/index.html   → aknaik.com/photography/
 contact/index.html       → aknaik.com/contact/
 thoughts/                posts → aknaik.com/thoughts/ (pages are generated, see below)
 resume.pdf               → aknaik.com/resume.pdf
-assets/ascii-arts.js     background ASCII art used on every page
+assets/ascii-scenes.js   the animated scene along the bottom (lake or fjord, one per visit)
+assets/scene.css         its styles and colours; every page but photography links it
+assets/typewriter.js/.css   the typing effect (home page and the Thoughts list)
 assets/photography/      original photos + captions.txt (see below)
 build.mjs                builds the site into dist/
 build-thoughts.mjs       turns thoughts/ into the Thoughts pages

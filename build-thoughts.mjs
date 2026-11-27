@@ -77,13 +77,6 @@ const STYLE = `
   .content { position: relative; z-index: 1; max-width: 556px; padding: 5rem 1.5rem 6rem; }
   h1 { margin: 0 0 1.5rem; font-size: 36px; font-weight: 400; line-height: 1; letter-spacing: -0.025em; }
   a { color: var(--link); text-decoration-thickness: 0.05em; text-underline-offset: 0.12em; }
-  #ascii-art {
-    position: fixed; inset: 0; z-index: 0;
-    display: flex; align-items: flex-end; justify-content: center;
-    overflow: hidden; margin: 0;
-    color: var(--art); font-family: var(--mono); font-size: max(0.57vw, 3px);
-    line-height: 1; white-space: pre; pointer-events: none;
-  }
   @media (max-width: 722px) {
     .content { padding: 3rem 1.5rem 4rem; }
     h1 { font-size: 30px; }
@@ -91,7 +84,7 @@ const STYLE = `
   }
 
   /* the list */
-  .posts { margin-top: 1.5rem; }
+  .posts { margin-top: 1.5rem; position: relative; background: rgba(251, 247, 236, 0.85); }
   .post-row { display: flex; gap: 1em; }
   .post-row .date { flex: none; width: 6.8em; color: var(--muted); }
   .empty { margin-top: 1.5rem; color: var(--muted); }
@@ -114,7 +107,20 @@ const STYLE = `
   article th, article td { border-bottom: 1px solid var(--art); padding: 0.3em 0.8em 0.3em 0; text-align: left; }
 `;
 
-function page({ title, description, url, body }) {
+// the list page types itself in (once per visit), like the home page; see /assets/typewriter.js
+const TYPING_HEAD = `<script>
+  // typewriter: hide the text under the h1 until /assets/typewriter.js types it in (once per visit)
+  try {
+    if (!sessionStorage.getItem("typed:" + location.pathname) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("typing");
+      if (!document.prerendering) setTimeout(() => document.documentElement.classList.remove("typing"), 4000);   // never stay hidden
+    }
+  } catch (e) {}
+</script>
+<link rel="stylesheet" href="/assets/typewriter.css">
+`;
+
+function page({ title, description, url, body, typing = false }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -131,6 +137,7 @@ function page({ title, description, url, body }) {
 <meta property="og:url" content="${esc(url)}">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♞</text></svg>">
+${typing ? TYPING_HEAD : ""}<link rel="stylesheet" href="/assets/scene.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap">
 <style>${STYLE}</style>
 </head>
@@ -140,9 +147,9 @@ function page({ title, description, url, body }) {
 ${body}
 </div>
 
-<div id="ascii-art" aria-hidden="true"></div>
+<pre id="scene" aria-hidden="true"></pre>
 
-<script src="/assets/ascii-arts.js"></script>
+${typing ? '<script src="/assets/typewriter.js"></script>\n' : ""}<script src="/assets/ascii-scenes.js"></script>
 </body>
 </html>
 `;
@@ -209,6 +216,7 @@ ${p.html}  </article>`;
     title: "Thoughts · Akshay Naik",
     description: "Writing by Akshay Naik.",
     url: "https://aknaik.com/thoughts/",
+    typing: true,
     body: `  <h1>Thoughts</h1>
   <a href="/">← back</a>
 ${posts.length ? `  <div class="posts">\n${rows}\n  </div>` : `  <div class="empty">Nothing here yet.</div>`}`,
